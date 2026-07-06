@@ -1,17 +1,8 @@
 "use client";
 
-import { getAuthUser } from "@/lib/auth-session";
-import type { AuthUser } from "@/types/auth";
-import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export function useAuthUser() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    setUser(getAuthUser());
-    setIsReady(true);
-  }, []);
-
+  const { user, isReady } = useAuth();
   return { user, isReady };
 }

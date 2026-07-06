@@ -1,5 +1,6 @@
 import { getIamUrl } from "@/config/env";
 import { apiRequest } from "@/lib/api-client";
+import { ApiError } from "@/types/api";
 import { clearAuthSession, getAuthToken, saveAuthSession } from "@/lib/auth-session";
 import type {
   ApiUserRole,
@@ -28,6 +29,7 @@ export async function register(form: RegisterFormData): Promise<AuthData> {
 
   const response = await apiRequest<AuthData>(getIamUrl("auth/register"), {
     method: "POST",
+    token: null,
     body: {
       username: payload.username,
       email: payload.email,
@@ -48,6 +50,7 @@ export async function register(form: RegisterFormData): Promise<AuthData> {
 export async function login(form: LoginFormData): Promise<AuthData> {
   const response = await apiRequest<AuthData>(getIamUrl("auth/login"), {
     method: "POST",
+    token: null,
     body: {
       username: form.username.trim(),
       password: form.password,
@@ -69,13 +72,44 @@ export function getPostLoginPath(role: ApiUserRole): string {
   return "/marketplace-umkm";
 }
 
-export async function logout(): Promise<void> {  const token = getAuthToken();
+export function getSafeRedirectPath(
+  redirect: string | null | undefined,
+  fallback: string,
+): string {
+  if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
+    return redirect;
+  }
+  return fallback;
+}
+
+export async function validateToken(): Promise<boolean> {
+  const token = getAuthToken();
+  if (!token) return false;
+
+  try {
+    await apiRequest<unknown>(getIamUrl("auth/token-validation"), {
+      method: "GET",
+      token,
+      skipAuthRedirect: true,
+    });
+    return true;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      clearAuthSession();
+    }
+    return false;
+  }
+}
+
+export async function logout(): Promise<void> {
+  const token = getAuthToken();
 
   try {
     if (token) {
       await apiRequest<[]>(getIamUrl("auth/logout"), {
         method: "POST",
         token,
+        skipAuthRedirect: true,
       });
     }
   } catch {

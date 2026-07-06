@@ -1,5 +1,6 @@
 import LoginForm from "@/components/auth/LoginForm";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Masuk | DesaHub",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  return <LoginForm />;
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-gray-500">Memuat...</div>}>
+      <LoginForm />
+    </Suspense>
+  );
 }

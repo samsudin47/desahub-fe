@@ -1,4 +1,5 @@
 import type { Product } from "@/data/marketplace";
+import { categories } from "@/data/marketplace";
 import { cn } from "@/lib/cn";
 
 export default function ProductImage({
@@ -16,21 +17,33 @@ export default function ProductImage({
     lg: "text-6xl",
   }[size];
 
-  const emoji = {
-    makanan: "🍚",
-    minuman: "🥤",
-    kerajinan: "🧺",
-    pertanian: "🌾",
-    fashion: "👕",
-    jasa: "🛠️",
-  }[product.category];
+  const emoji =
+    categories.find((c) => c.slug === product.category)?.icon ??
+    {
+      makanan: "🍚",
+      minuman: "🥤",
+      kerajinan: "🧺",
+      pertanian: "🌾",
+      fashion: "👕",
+      jasa: "🛠️",
+    }[product.category];
+
+  if (product.imageUrl) {
+    return (
+      <img
+        src={product.imageUrl}
+        alt={product.name}
+        className={cn("rounded-xl object-cover", className)}
+      />
+    );
+  }
 
   return (
     <div
       className={cn(
         "flex items-center justify-center rounded-xl",
         sizeClass,
-        className
+        className,
       )}
       style={{ backgroundColor: product.imageColor }}
       aria-hidden

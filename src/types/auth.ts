@@ -8,32 +8,10 @@ export const API_ROLES = {
 
 export type ApiUserRole = (typeof API_ROLES)[keyof typeof API_ROLES];
 
-/** Roles available on public registration (SUPERADMIN excluded) */
-export type RegisterableRole = Exclude<ApiUserRole, "SUPERADMIN">;
-
 export interface RoleOption {
-  value: RegisterableRole;
+  value: ApiUserRole;
   label: string;
-  description: string;
 }
-
-export const USER_ROLE_OPTIONS: RoleOption[] = [
-  {
-    value: API_ROLES.WARGA,
-    label: "Warga",
-    description: "Warga, can be do anything for feed",
-  },
-  {
-    value: API_ROLES.USER,
-    label: "User",
-    description: "User, can be do anything for info",
-  },
-  {
-    value: API_ROLES.ADMIN,
-    label: "Admin",
-    description: "Admin, can be do anything for human capital",
-  },
-];
 
 export interface LoginFormData {
   username: string;
@@ -51,7 +29,7 @@ export interface RegisterFormData {
   email: string;
   password: string;
   passwordConfirmation: string;
-  role: RegisterableRole | "";
+  role: ApiUserRole | "";
 }
 
 export interface RegisterPayload {

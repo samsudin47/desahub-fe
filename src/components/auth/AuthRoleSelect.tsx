@@ -95,22 +95,15 @@ export function AuthRoleSelect({
                   key={option.value}
                   value={option.value}
                   className={cn(
-                    "relative flex cursor-pointer select-none items-start gap-2 rounded-md px-3 py-2.5 text-sm outline-none",
+                    "relative flex cursor-pointer select-none items-center gap-2 rounded-md px-3 py-2.5 text-sm outline-none",
                     "text-gray-800 data-highlighted:bg-desahub-50 data-highlighted:text-desahub-700",
                     "data-[state=checked]:bg-desahub-50/60",
                   )}
                 >
-                  <div className="flex min-w-0 flex-1 flex-col gap-0.5 pr-6">
-                    <Select.ItemText asChild>
-                      <span className="font-medium leading-tight">{option.label}</span>
-                    </Select.ItemText>
-                    {option.description && (
-                      <span className="text-xs leading-snug text-gray-500">
-                        {option.description}
-                      </span>
-                    )}
-                  </div>
-                  <Select.ItemIndicator className="absolute right-3 top-3">
+                  <Select.ItemText asChild>
+                    <span className="flex-1 pr-6 font-medium leading-tight">{option.label}</span>
+                  </Select.ItemText>
+                  <Select.ItemIndicator className="absolute right-3">
                     <Check className="size-4 text-desahub-600" />
                   </Select.ItemIndicator>
                 </Select.Item>

@@ -7,16 +7,17 @@ import SsoButtons from "@/components/auth/SsoButtons";
 import Checkbox from "@/components/form/input/Checkbox";
 import MktButton from "@/components/marketplace/ui/MktButton";
 import { mapLoginApiError } from "@/lib/auth-errors";
-import { getPostLoginPath, login } from "@/services/auth.service";
+import { getPostLoginPath, getSafeRedirectPath, login } from "@/services/auth.service";
 import type { LoginFormData } from "@/types/auth";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 type FormErrors = Partial<Record<keyof LoginFormData, string>>;
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState<LoginFormData>({
     username: "",
     password: "",
@@ -41,7 +42,12 @@ export default function LoginForm() {
 
     try {
       const authData = await login(form);
-      router.push(getPostLoginPath(authData.user.role));
+      router.push(
+        getSafeRedirectPath(
+          searchParams.get("redirect"),
+          getPostLoginPath(authData.user.role),
+        ),
+      );
     } catch (error) {
       const { fieldErrors, formError: apiFormError } = mapLoginApiError(error);
       setErrors(fieldErrors);

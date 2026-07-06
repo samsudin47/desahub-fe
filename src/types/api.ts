@@ -8,7 +8,7 @@ export interface ApiSuccessResponse<T> {
 }
 
 export interface ApiErrorResponse {
-  result?: "error" | "failed";
+  result?: "error" | "failed" | "unauthorized" | "forbidden";
   code?: number;
   message?: string;
   description?: string;

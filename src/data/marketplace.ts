@@ -38,6 +38,7 @@ export interface Product {
   sold: number;
   stock: number;
   imageColor: string;
+  imageUrl?: string;
   featured?: boolean;
 }
 
@@ -65,7 +66,7 @@ export const categories: Category[] = [
   { slug: "jasa", name: "Jasa", icon: "🛠️" },
 ];
 
-const sellers: Seller[] = [
+export const sellers: Seller[] = [
   {
     id: "toko-1",
     name: "Warung Bu Siti",
@@ -308,6 +309,58 @@ export function getFeaturedProducts(): Product[] {
 
 export function getCategoryBySlug(slug: string): Category | undefined {
   return categories.find((c) => c.slug === slug);
+}
+
+export function getUniqueSellers(): Seller[] {
+  const seen = new Set<string>();
+  return products
+    .map((p) => p.seller)
+    .filter((seller) => {
+      if (seen.has(seller.id)) return false;
+      seen.add(seller.id);
+      return true;
+    });
+}
+
+export function getProductsBySeller(sellerId: string): Product[] {
+  return products.filter((p) => p.seller.id === sellerId);
+}
+
+export function getProductCountByCategory(slug: ProductCategory): number {
+  return products.filter((p) => p.category === slug).length;
+}
+
+export function getMarketplaceStats() {
+  const uniqueSellers = getUniqueSellers();
+  const totalRevenue = mockOrders.reduce((sum, o) => sum + o.total, 0);
+  const completedRevenue = mockOrders
+    .filter((o) => o.status === "selesai")
+    .reduce((sum, o) => sum + o.total, 0);
+  const pendingOrders = mockOrders.filter(
+    (o) => o.status === "menunggu_pembayaran" || o.status === "diproses",
+  ).length;
+  const shippingOrders = mockOrders.filter((o) => o.status === "dikirim").length;
+  const totalSold = products.reduce((sum, p) => sum + p.sold, 0);
+  const lowStockProducts = products.filter((p) => p.stock < 20).length;
+  const monthlyTargetAmount = 50_000_000;
+  const targetProgress = Math.min(
+    100,
+    Math.round((totalRevenue / monthlyTargetAmount) * 100 * 10) / 10,
+  );
+
+  return {
+    totalProducts: products.length,
+    totalOrders: mockOrders.length,
+    totalSellers: uniqueSellers.length,
+    totalRevenue,
+    completedRevenue,
+    pendingOrders,
+    shippingOrders,
+    totalSold,
+    lowStockProducts,
+    monthlyTargetAmount,
+    targetProgress,
+  };
 }
 
 export const orderStatusLabels: Record<OrderStatus, string> = {

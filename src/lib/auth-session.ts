@@ -1,3 +1,4 @@
+import { notifyAuthSessionChanged } from "@/lib/auth-events";
 import type { AuthSession } from "@/types/auth";
 
 const TOKEN_KEY = "desahub_token";
@@ -11,6 +12,7 @@ export function saveAuthSession(session: AuthSession): void {
   if (!isBrowser()) return;
   localStorage.setItem(TOKEN_KEY, session.token);
   localStorage.setItem(USER_KEY, JSON.stringify(session.user));
+  notifyAuthSessionChanged();
 }
 
 export function getAuthToken(): string | null {
@@ -33,4 +35,5 @@ export function clearAuthSession(): void {
   if (!isBrowser()) return;
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  notifyAuthSessionChanged();
 }

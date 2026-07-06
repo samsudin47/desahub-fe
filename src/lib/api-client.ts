@@ -1,3 +1,5 @@
+import { notifyUnauthorized } from "@/lib/auth-events";
+import { getAuthToken } from "@/lib/auth-session";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types/api";
 import { ApiError } from "@/types/api";
 
@@ -5,7 +7,8 @@ type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: URLSearchParams | FormData | Record<string, string>;
   headers?: HeadersInit;
-  token?: string;
+  token?: string | null;
+  skipAuthRedirect?: boolean;
 };
 
 function buildBody(
@@ -50,19 +53,32 @@ function extractErrorMessage(
   );
 }
 
+function shouldTriggerUnauthorized(
+  response: Response,
+  payload: ApiErrorResponse | null,
+  hadToken: boolean,
+  skipAuthRedirect: boolean,
+): boolean {
+  if (skipAuthRedirect || !hadToken) return false;
+  return response.status === 401 || payload?.result === "unauthorized";
+}
+
 export async function apiRequest<T>(
   url: string,
   options: RequestOptions = {},
 ): Promise<ApiSuccessResponse<T>> {
-  const { method = "GET", body, headers = {}, token } = options;
+  const { method = "GET", body, headers = {}, skipAuthRedirect = false } = options;
   const contentType = getContentType(body);
+  const resolvedToken =
+    options.token === null ? null : (options.token ?? getAuthToken());
+  const hadToken = Boolean(resolvedToken);
 
   const response = await fetch(url, {
     method,
     headers: {
       Accept: "application/json",
       ...(contentType ? { "Content-Type": contentType } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(resolvedToken ? { Authorization: `Bearer ${resolvedToken}` } : {}),
       ...headers,
     },
     body: buildBody(body),
@@ -70,8 +86,32 @@ export async function apiRequest<T>(
 
   const payload = await parseJson<ApiSuccessResponse<T> | ApiErrorResponse>(response);
 
+  if (
+    shouldTriggerUnauthorized(
+      response,
+      payload as ApiErrorResponse | null,
+      hadToken,
+      skipAuthRedirect,
+    )
+  ) {
+    notifyUnauthorized();
+  }
+
   if (!response.ok || payload?.result === "error" || payload?.result === "failed") {
     const errorPayload = payload as ApiErrorResponse | null;
+    throw new ApiError(
+      extractErrorMessage(errorPayload, `Request failed (${response.status})`),
+      response.status,
+      {
+        fieldErrors: extractFieldErrors(errorPayload),
+        validationFailed: errorPayload?.validationFailed ?? [],
+        code: errorPayload?.code,
+      },
+    );
+  }
+
+  if (payload?.result === "unauthorized" || payload?.result === "forbidden") {
+    const errorPayload = payload as ApiErrorResponse;
     throw new ApiError(
       extractErrorMessage(errorPayload, `Request failed (${response.status})`),
       response.status,
