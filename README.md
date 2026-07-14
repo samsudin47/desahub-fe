@@ -76,7 +76,8 @@ cp .env.example .env
 | Variabel | Deskripsi |
 |----------|-----------|
 | `NEXT_PUBLIC_API_URL` | Base URL backend Laravel (tanpa trailing slash), contoh: `http://127.0.0.1:8000` |
-| `NEXT_PUBLIC_IAM_PREFIX` | Prefix route IAM di Laravel, contoh: `api/v1/iam-services` |
+
+Prefix route tiap service API dikelola di `src/config/api-prefixes.ts` (bukan di `.env`).
 
 ### 4. Jalankan development server
 

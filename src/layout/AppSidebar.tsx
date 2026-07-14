@@ -8,6 +8,7 @@ import {
   BellIcon,
   BoltIcon,
   BoxCubeIcon,
+  FolderIcon,
   ChatIcon,
   CheckCircleIcon,
   ChevronDownIcon,
@@ -89,6 +90,14 @@ const navItems: NavItem[] = [
     icon: <BoltIcon />,
     name: "SPK Pembangunan",
     path: "/spk-pembangunan",
+  },
+  {
+    icon: <FolderIcon />,
+    name: "Data Management",
+    subItems: [
+      { name: "Master Kategori", path: "/data-management/master-kategori" },
+      { name: "Master Penjual", path: "/data-management/master-penjual" },
+    ],
   },
   {
     icon: <GroupIcon />,
