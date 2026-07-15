@@ -18,6 +18,7 @@ type FormSelectProps = {
   placeholder?: string;
   disabled?: boolean;
   id?: string;
+  error?: string;
 };
 
 export default function FormSelect({
@@ -28,20 +29,31 @@ export default function FormSelect({
   placeholder = "Pilih opsi",
   disabled = false,
   id,
+  error,
 }: FormSelectProps) {
   const fieldId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
+  const resolvedValue = options.some((option) => option.value === value)
+    ? value
+    : undefined;
 
   return (
     <div>
       {label && <Label htmlFor={fieldId}>{label}</Label>}
 
-      <Select.Root value={value} onValueChange={onChange} disabled={disabled}>
+      <Select.Root
+        value={resolvedValue}
+        onValueChange={onChange}
+        disabled={disabled}
+      >
         <Select.Trigger
           id={fieldId}
           aria-label={label}
           className={cn(
-            "group flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm shadow-theme-xs outline-none transition-colors",
-            "focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10",
+            "group flex h-11 w-full items-center justify-between gap-2 rounded-lg border bg-white px-4 text-sm shadow-theme-xs outline-none transition-colors",
+            error
+              ? "border-error-500 focus:border-error-500 focus:ring-error-500/10"
+              : "border-gray-300 focus:border-brand-300 focus:ring-brand-500/10",
+            "focus:ring-3",
             "disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400",
             "data-placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90",
           )}
@@ -84,6 +96,7 @@ export default function FormSelect({
           </Select.Content>
         </Select.Portal>
       </Select.Root>
+      {error && <p className="mt-1.5 text-xs text-error-600">{error}</p>}
     </div>
   );
 }

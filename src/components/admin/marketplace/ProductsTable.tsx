@@ -8,10 +8,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Badge from "@/components/ui/badge/Badge";
-import { categories, type Product } from "@/data/marketplace";
-import { formatCurrency } from "@/lib/format";
-import TableRowActions from "@/components/admin/marketplace/TableRowActions";
 import AdminProductThumbnail from "@/components/admin/marketplace/AdminProductThumbnail";
+import TableRowActions from "@/components/admin/marketplace/TableRowActions";
+import { formatCurrency } from "@/lib/format";
+import type { Product } from "@/types/product";
 
 interface ProductsTableProps {
   products: Product[];
@@ -41,6 +41,9 @@ export default function ProductsTable({
         <Table>
           <TableHeader className="border-b border-gray-100 dark:border-gray-800">
             <TableRow>
+              <TableCell isHeader className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400">
+                Gambar
+              </TableCell>
               <TableCell isHeader className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
                 Produk
               </TableCell>
@@ -56,74 +59,54 @@ export default function ProductsTable({
               <TableCell isHeader className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
                 Stok
               </TableCell>
-              <TableCell isHeader className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
-                Terjual
-              </TableCell>
-              <TableCell isHeader className="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400">
-                Status
-              </TableCell>
               <TableCell isHeader className="min-w-[120px] px-4 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400">
                 Aksi
               </TableCell>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {products.map((product) => {
-              const category = categories.find(
-                (c) => c.slug === product.category,
-              );
-              return (
-                <TableRow key={product.id}>
-                  <TableCell className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <AdminProductThumbnail product={product} />
-                      <div>
-                        <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                          {product.name}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {product.id}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    {category?.name}
-                  </TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    {product.seller.name}
-                  </TableCell>
-                  <TableCell className="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
-                    {formatCurrency(product.price)}
-                  </TableCell>
-                  <TableCell className="px-6 py-4">
-                    <Badge
-                      size="sm"
-                      color={product.stock < 20 ? "warning" : "success"}
-                    >
-                      {product.stock}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-gray-800 dark:text-white/90">
-                    {product.sold}
-                  </TableCell>
-                  <TableCell className="px-6 py-4">
-                    <Badge
-                      size="sm"
-                      color={product.featured ? "success" : "light"}
-                    >
-                      {product.featured ? "Unggulan" : "Aktif"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="min-w-[120px] px-4 py-4 align-middle">
-                    <TableRowActions
-                      onEdit={() => onEdit(product)}
-                      onDelete={() => onDelete(product)}
-                    />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {products.map((product) => (
+              <TableRow key={product.uuid}>
+                <TableCell className="px-6 py-4 text-center">
+                  <div className="flex justify-center">
+                    <AdminProductThumbnail product={product} />
+                  </div>
+                </TableCell>
+                <TableCell className="px-6 py-4">
+                  <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                    {product.nama_product}
+                  </p>
+                  {product.deskripsi && (
+                    <p className="mt-0.5 line-clamp-1 text-xs text-gray-500 dark:text-gray-400">
+                      {product.deskripsi}
+                    </p>
+                  )}
+                </TableCell>
+                <TableCell className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                  {product.nama_kategori}
+                </TableCell>
+                <TableCell className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                  {product.nama_penjual}
+                </TableCell>
+                <TableCell className="px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
+                  {formatCurrency(product.harga)}
+                </TableCell>
+                <TableCell className="px-6 py-4">
+                  <Badge
+                    size="sm"
+                    color={product.stock < 20 ? "warning" : "success"}
+                  >
+                    {product.stock}
+                  </Badge>
+                </TableCell>
+                <TableCell className="min-w-[120px] px-4 py-4 align-middle">
+                  <TableRowActions
+                    onEdit={() => onEdit(product)}
+                    onDelete={() => onDelete(product)}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>

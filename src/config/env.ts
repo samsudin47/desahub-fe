@@ -26,3 +26,7 @@ export function getIamUrl(path: string): string {
 export function getDataManagementUrl(path: string): string {
   return getApiUrl("dataManagement", path);
 }
+
+export function getMarketplaceUrl(path: string): string {
+  return getApiUrl("marketplace", path);
+}
