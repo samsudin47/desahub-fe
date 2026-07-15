@@ -1,11 +1,5 @@
-import { redirect } from "next/navigation";
-
-
+import CategoryIndexRedirect from "@/components/marketplace/category/CategoryIndexRedirect";
 
 export default function KategoriPage() {
-
-  redirect("/marketplace-umkm/kategori/makanan");
-
+  return <CategoryIndexRedirect />;
 }
-
-

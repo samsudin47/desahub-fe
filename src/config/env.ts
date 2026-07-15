@@ -30,3 +30,11 @@ export function getDataManagementUrl(path: string): string {
 export function getMarketplaceUrl(path: string): string {
   return getApiUrl("marketplace", path);
 }
+
+export function getDropdownUrl(path: string): string {
+  return getApiUrl("dropdown", path);
+}
+
+export function getMarketplaceUmkmUrl(path: string): string {
+  return getApiUrl("marketplaceUmkm", path);
+}
