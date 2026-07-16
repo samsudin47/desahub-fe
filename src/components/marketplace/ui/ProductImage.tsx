@@ -33,7 +33,10 @@ export default function ProductImage({
       <img
         src={product.imageUrl}
         alt={product.name}
-        className={cn("rounded-xl object-cover", className)}
+        className={cn(
+          "block max-w-full rounded-xl object-cover",
+          className,
+        )}
       />
     );
   }

@@ -1,7 +1,14 @@
 import type { Product } from "@/data/marketplace";
+import { cn } from "@/lib/cn";
 import ProductCard from "./ProductCard";
 
-export default function ProductGrid({ products }: { products: Product[] }) {
+type ProductGridProps = {
+  products: Product[];
+  className?: string;
+};
+
+/** Multi-row product grid. Use on mobile or when wrapping is preferred. */
+export default function ProductGrid({ products, className }: ProductGridProps) {
   if (products.length === 0) {
     return (
       <p className="py-12 text-center text-gray-500">
@@ -11,7 +18,12 @@ export default function ProductGrid({ products }: { products: Product[] }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div
+      className={cn(
+        "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4",
+        className,
+      )}
+    >
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}

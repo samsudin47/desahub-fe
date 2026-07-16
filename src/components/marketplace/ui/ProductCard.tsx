@@ -21,11 +21,11 @@ export default function ProductCard({
   const { addItem } = useCart();
 
   return (
-    <div className="group overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:border-desahub-200 hover:shadow-theme-sm">
-      <Link href={`/marketplace-umkm/produk/${product.id}`}>
+    <div className="group min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:border-desahub-200 hover:shadow-theme-sm">
+      <Link href={`/marketplace-umkm/produk/${product.id}`} className="block overflow-hidden">
         <ProductImage
           product={product}
-          className="aspect-square w-full transition group-hover:scale-[1.02]"
+          className="aspect-square w-full max-w-full transition group-hover:scale-[1.02]"
           size="lg"
         />
       </Link>

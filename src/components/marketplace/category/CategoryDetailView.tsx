@@ -1,7 +1,7 @@
 "use client";
 
 import CategoryNav from "@/components/marketplace/category/CategoryNav";
-import ProductGrid from "@/components/marketplace/ui/ProductGrid";
+import ProductListing from "@/components/marketplace/ui/ProductListing";
 import { useDropdownKategori } from "@/hooks/useDropdownKategori";
 import { useProductCategory } from "@/hooks/useProductCategory";
 import { mapToMarketplaceProduct } from "@/lib/map-marketplace-product";
@@ -49,7 +49,7 @@ export default function CategoryDetailView({ slug }: CategoryDetailViewProps) {
         />
       </aside>
 
-      <div className="flex-1 space-y-4 px-4 py-4 lg:px-0 lg:py-0">
+      <div className="min-w-0 flex-1 space-y-4 overflow-x-hidden px-4 py-4 lg:px-0 lg:py-0">
         <div className="hidden lg:block">
           <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">
             {showHeaderLoading ? "Memuat..." : categoryName}
@@ -78,7 +78,7 @@ export default function CategoryDetailView({ slug }: CategoryDetailViewProps) {
         ) : isProductsLoading && !data ? (
           <p className="py-12 text-center text-gray-500">Memuat produk...</p>
         ) : (
-          <ProductGrid products={products} />
+          <ProductListing products={products} />
         )}
       </div>
     </div>
