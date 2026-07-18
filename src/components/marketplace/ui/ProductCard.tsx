@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import type { Product } from "@/data/marketplace";
@@ -18,11 +19,27 @@ export default function ProductCard({
   product,
   showAddButton = true,
 }: ProductCardProps) {
-  const { addItem } = useCart();
+  const { addItem, isAdding } = useCart();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAdd = async () => {
+    if (isSubmitting || isAdding) return;
+    setIsSubmitting(true);
+    try {
+      await addItem(product, 1);
+    } catch {
+      // toast sudah di CartContext
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="group min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:border-desahub-200 hover:shadow-theme-sm">
-      <Link href={`/marketplace-umkm/produk/${product.id}`} className="block overflow-hidden">
+      <Link
+        href={`/marketplace-umkm/produk/${product.id}`}
+        className="block overflow-hidden"
+      >
         <ProductImage
           product={product}
           className="aspect-square w-full max-w-full transition group-hover:scale-[1.02]"
@@ -48,9 +65,10 @@ export default function ProductCard({
             size="sm"
             className="w-full"
             startIcon={<Plus className="size-4" />}
-            onClick={() => addItem(product)}
+            disabled={isSubmitting || isAdding}
+            onClick={() => void handleAdd()}
           >
-            Tambah
+            {isSubmitting ? "Menambah..." : "Tambah"}
           </MktButton>
         )}
       </div>

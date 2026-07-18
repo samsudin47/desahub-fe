@@ -173,8 +173,8 @@ export default function MarketplaceHeader() {
               >
                 <ShoppingCart className="size-5" />
                 {itemCount > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 flex size-4.5 items-center justify-center rounded-full bg-desahub-500 text-[10px] font-bold text-white">
-                    {itemCount > 9 ? "9+" : itemCount}
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-desahub-500 px-1 text-[10px] font-bold text-white">
+                    {itemCount}
                   </span>
                 )}
               </Link>

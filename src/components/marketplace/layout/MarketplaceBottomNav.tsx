@@ -82,8 +82,8 @@ export default function MarketplaceBottomNav() {
                 strokeWidth={active ? 2.5 : 2}
               />
               {isCart && itemCount > 0 && (
-                <span className="absolute right-[calc(50%-18px)] top-1 flex size-4 items-center justify-center rounded-full bg-desahub-500 text-[9px] font-bold text-white">
-                  {itemCount > 9 ? "9+" : itemCount}
+                <span className="absolute right-[calc(50%-18px)] top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-desahub-500 px-1 text-[9px] font-bold text-white">
+                  {itemCount}
                 </span>
               )}
               {label}

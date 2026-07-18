@@ -43,8 +43,10 @@ export interface Product {
 }
 
 export interface CartItem {
+  id: string;
   product: Product;
   quantity: number;
+  subtotal: number;
 }
 
 export interface Order {
