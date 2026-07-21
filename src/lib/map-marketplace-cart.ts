@@ -1,6 +1,15 @@
 import type { CartItem, Product } from "@/data/marketplace";
 import type { CartDatas, CartItemApi } from "@/types/cart";
 
+export function mapCartItemApiToCartItem(item: CartItemApi): CartItem {
+  return {
+    id: item.uuid,
+    product: mapCartItemToProduct(item),
+    quantity: item.quantity,
+    subtotal: item.subtotal,
+  };
+}
+
 function mapCartItemToProduct(item: CartItemApi): Product {
   return {
     id: item.produk.uuid,
@@ -24,10 +33,5 @@ function mapCartItemToProduct(item: CartItemApi): Product {
 }
 
 export function mapCartDatasToItems(datas: CartDatas): CartItem[] {
-    return datas.items.map((item) => ({
-      id: item.uuid,
-      product: mapCartItemToProduct(item),
-      quantity: item.quantity,
-      subtotal: item.subtotal,
-    }));
+  return datas.items.map(mapCartItemApiToCartItem);
 }

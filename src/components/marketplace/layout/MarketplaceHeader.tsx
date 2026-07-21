@@ -36,6 +36,8 @@ const pageTitles: Record<string, string> = {
 function getMobileTitle(pathname: string): string | null {
   if (pathname === "/marketplace-umkm") return null;
   if (pageTitles[pathname]) return pageTitles[pathname];
+  if (pathname.startsWith("/marketplace-umkm/checkout/")) return "Checkout";
+  if (pathname.startsWith("/marketplace-umkm/pembayaran/")) return "Pembayaran";
   if (pathname.startsWith("/marketplace-umkm/kategori")) return "Kategori";
   if (pathname.startsWith("/marketplace-umkm/pesanan/")) return "Detail Pesanan";
   if (pathname.startsWith("/marketplace-umkm/produk/")) return "Detail Produk";

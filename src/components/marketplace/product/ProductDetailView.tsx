@@ -17,7 +17,7 @@ export default function ProductDetailView({ product }: { product: Product }) {
 
   const handleBuyNow = async () => {
     await addItem(product, quantity);
-    router.push("/marketplace-umkm/checkout");
+    router.push("/marketplace-umkm/keranjang");
 
   };
 

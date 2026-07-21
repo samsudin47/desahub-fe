@@ -6,13 +6,16 @@ import { CheckCircle } from "lucide-react";
 import CheckoutSteps from "@/components/marketplace/checkout/CheckoutSteps";
 import MktButton from "@/components/marketplace/ui/MktButton";
 import { useCart } from "@/context/CartContext";
+import { useCheckoutFlow } from "@/context/CheckoutContext";
 
 export default function SelesaiPage() {
   const { clearCart } = useCart();
+  const { clearActiveCheckout } = useCheckoutFlow();
 
   useEffect(() => {
     clearCart();
-  }, [clearCart]);
+    clearActiveCheckout();
+  }, [clearActiveCheckout, clearCart]);
 
   return (
     <div className="mx-auto max-w-lg space-y-8 py-12 text-center">

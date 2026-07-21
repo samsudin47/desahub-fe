@@ -5,24 +5,57 @@ import { ApiError } from "@/types/api";
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  body?: URLSearchParams | FormData | Record<string, string>;
+  body?:
+    | URLSearchParams
+    | FormData
+    | Record<string, string>
+    | Record<string, unknown>
+    | unknown[];
   headers?: HeadersInit;
   token?: string | null;
   skipAuthRedirect?: boolean;
 };
 
 function buildBody(
-  body: URLSearchParams | FormData | Record<string, string> | undefined,
+  body:
+    | URLSearchParams
+    | FormData
+    | Record<string, string>
+    | Record<string, unknown>
+    | unknown[]
+    | undefined,
 ): BodyInit | undefined {
   if (!body) return undefined;
   if (body instanceof URLSearchParams || body instanceof FormData) return body;
+  if (
+    Array.isArray(body) ||
+    Object.values(body).some(
+      (value) => typeof value !== "string" && value !== undefined,
+    )
+  ) {
+    return JSON.stringify(body);
+  }
   return new URLSearchParams(body);
 }
 
 function getContentType(
-  body: URLSearchParams | FormData | Record<string, string> | undefined,
+  body:
+    | URLSearchParams
+    | FormData
+    | Record<string, string>
+    | Record<string, unknown>
+    | unknown[]
+    | undefined,
 ): string | undefined {
   if (!body || body instanceof FormData) return undefined;
+  if (
+    Array.isArray(body) ||
+    Object.values(body).some(
+      (value) => typeof value !== "string" && value !== undefined,
+    )
+  ) {
+    return "application/json";
+  }
   return "application/x-www-form-urlencoded";
 }
 
