@@ -4,6 +4,8 @@ import { apiRequest } from "@/lib/api-client";
 import type {
   CancelCheckoutDatas,
   CheckoutDatas,
+  CheckoutShippingDatas,
+  CheckoutShippingPayload,
   CreateCheckoutPayload,
 } from "@/types/checkout";
 
@@ -47,6 +49,24 @@ export async function cancelCheckout(
   const response = await apiRequest<CancelCheckoutDatas>(
     getMarketplaceUmkmUrl(`${CHECKOUT_PATH}/${uuid}/cancel`),
     { method: "POST" },
+  );
+
+  return {
+    data: response.datas,
+    message: getApiSuccessMessage(response),
+  };
+}
+
+export async function updateCheckoutShipping(
+  uuid: string,
+  payload: CheckoutShippingPayload,
+): Promise<CheckoutMutationResult<CheckoutShippingDatas>> {
+  const response = await apiRequest<CheckoutShippingDatas>(
+    getMarketplaceUmkmUrl(`${CHECKOUT_PATH}/${uuid}/shipping`),
+    {
+      method: "PUT",
+      body: payload,
+    },
   );
 
   return {

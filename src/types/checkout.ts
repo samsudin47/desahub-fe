@@ -26,3 +26,21 @@ export type CancelCheckoutDatas = {
   checkout: CheckoutDatas;
   cart: CartDatas;
 };
+
+export type CheckoutShippingPayload = {
+  nama_penerima: string;
+  no_hp_penerima: string;
+  alamat_penerima: string;
+  latitude: number;
+  longitude: number;
+};
+
+export type CheckoutShippingDatas = {
+  uuid: string;
+  uuid_checkout: string;
+  nama_penerima: string;
+  no_hp_penerima: string;
+  alamat_penerima: string;
+  latitude: string;
+  longitude: string;
+};

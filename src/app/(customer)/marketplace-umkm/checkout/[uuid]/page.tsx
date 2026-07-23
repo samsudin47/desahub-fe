@@ -1,17 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import CartItemList from "@/components/marketplace/cart/CartItemList";
 import OrderSummary from "@/components/marketplace/cart/OrderSummary";
+import CheckoutInfoCard, {
+  type CheckoutShippingFormHandle,
+} from "@/components/marketplace/checkout/CheckoutInfoCard";
 import CheckoutSteps from "@/components/marketplace/checkout/CheckoutSteps";
 import MktButton from "@/components/marketplace/ui/MktButton";
 import { useCheckoutFlow } from "@/context/CheckoutContext";
 import { mapCheckoutDatasToItems } from "@/lib/map-marketplace-checkout";
 import { getPembayaranPagePath } from "@/lib/checkout-routes";
-import { fetchCheckout } from "@/services/checkout.service";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
+import {
+  fetchCheckout,
+  updateCheckoutShipping,
+} from "@/services/checkout.service";
 import type { CheckoutDatas } from "@/types/checkout";
-import { showErrorToast } from "@/lib/toast";
 import { ApiError } from "@/types/api";
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -24,8 +30,10 @@ export default function CheckoutDetailPage() {
   const router = useRouter();
   const params = useParams<{ uuid: string }>();
   const { clearActiveCheckout, setActiveCheckout } = useCheckoutFlow();
+  const shippingFormRef = useRef<CheckoutShippingFormHandle>(null);
   const [checkout, setCheckout] = useState<CheckoutDatas | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutUuid, setCheckoutUuid] = useState("");
 
   useEffect(() => {
@@ -60,6 +68,28 @@ export default function CheckoutDetailPage() {
     };
   }, [clearActiveCheckout, params, setActiveCheckout]);
 
+  const handleContinueToPayment = async () => {
+    if (!checkout || checkout.status === "cancelled" || isSubmitting) return;
+
+    const payload = shippingFormRef.current?.validateAndGetPayload();
+    if (!payload) {
+      showErrorToast("Lengkapi data pengiriman terlebih dahulu");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const result = await updateCheckoutShipping(checkout.uuid, payload);
+      showSuccessToast(result.message);
+      router.push(getPembayaranPagePath(checkout.uuid));
+    } catch (error) {
+      shippingFormRef.current?.applyApiError(error);
+      showErrorToast(getErrorMessage(error, "Gagal menyimpan data pengiriman"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (isLoading) {
     return <p className="py-12 text-center text-gray-500">Memuat checkout...</p>;
   }
@@ -79,6 +109,10 @@ export default function CheckoutDetailPage() {
   }
 
   const items = mapCheckoutDatasToItems(checkout);
+  const continueDisabled = checkout.status === "cancelled" || isSubmitting;
+  const continueLabel = isSubmitting
+    ? "Menyimpan..."
+    : "Lanjut ke Pembayaran";
 
   return (
     <div className="space-y-6 pb-24 sm:space-y-8 lg:pb-0">
@@ -96,23 +130,12 @@ export default function CheckoutDetailPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <div className="rounded-2xl border border-gray-200 bg-white p-5">
-            <h2 className="mb-2 font-semibold text-gray-900">Informasi Checkout</h2>
-            <dl className="space-y-2 text-sm text-gray-600">
-              <div className="flex justify-between gap-4">
-                <dt>ID Checkout</dt>
-                <dd className="text-right font-medium text-gray-900">
-                  {checkoutUuid}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt>Status</dt>
-                <dd className="font-medium capitalize text-gray-900">
-                  {checkout.status}
-                </dd>
-              </div>
-            </dl>
-          </div>
+          <CheckoutInfoCard
+            ref={shippingFormRef}
+            checkoutUuid={checkoutUuid}
+            status={checkout.status}
+            disabled={checkout.status === "cancelled" || isSubmitting}
+          />
 
           <div>
             <h2 className="mb-3 font-semibold text-gray-900">Item Pesanan</h2>
@@ -124,10 +147,10 @@ export default function CheckoutDetailPage() {
           <OrderSummary itemCount={checkout.total_item} total={checkout.total_harga} />
           <MktButton
             className="hidden w-full lg:inline-flex"
-            disabled={checkout.status === "cancelled"}
-            onClick={() => router.push(getPembayaranPagePath(checkout.uuid))}
+            disabled={continueDisabled}
+            onClick={() => void handleContinueToPayment()}
           >
-            Lanjut ke Pembayaran
+            {continueLabel}
           </MktButton>
         </div>
       </div>
@@ -135,10 +158,10 @@ export default function CheckoutDetailPage() {
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] lg:hidden">
         <MktButton
           className="w-full"
-          disabled={checkout.status === "cancelled"}
-          onClick={() => router.push(getPembayaranPagePath(checkout.uuid))}
+          disabled={continueDisabled}
+          onClick={() => void handleContinueToPayment()}
         >
-          Lanjut ke Pembayaran
+          {continueLabel}
         </MktButton>
       </div>
     </div>
