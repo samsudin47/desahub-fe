@@ -95,7 +95,9 @@ export default function CartItemList({
       )}
 
       {resolvedItems.map((item) => {
-        const { id, product, quantity, subtotal } = item;
+        const { id, product, quantity, subtotal, sisaStock } = item;
+        const canIncrease =
+          sisaStock === undefined ? quantity < product.stock : sisaStock > 0;
 
         return (
           <div
@@ -124,6 +126,19 @@ export default function CartItemList({
                   {product.name}
                 </Link>
                 <p className="text-xs text-gray-500">{product.seller.name}</p>
+                {sisaStock !== undefined && (
+                  <p
+                    className={`mt-0.5 text-xs ${
+                      sisaStock <= 0
+                        ? "text-error-500"
+                        : sisaStock <= 3
+                          ? "text-amber-600"
+                          : "text-gray-500"
+                    }`}
+                  >
+                    Sisa stok: {sisaStock}
+                  </p>
+                )}
               </div>
               <div className="mt-2 flex items-center justify-between">
                 {readOnlyQuantity ? (
@@ -132,7 +147,7 @@ export default function CartItemList({
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      className="rounded-lg border border-gray-200 p-1 hover:bg-gray-50"
+                      className="rounded-lg border border-gray-200 p-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                       onClick={() => void decrementItem(id)}
                       disabled={quantity <= 1}
                     >
@@ -143,8 +158,9 @@ export default function CartItemList({
                     </span>
                     <button
                       type="button"
-                      className="rounded-lg border border-gray-200 p-1 hover:bg-gray-50"
+                      className="rounded-lg border border-gray-200 p-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                       onClick={() => void incrementItem(id)}
+                      disabled={!canIncrease}
                     >
                       <Plus className="size-3.5" />
                     </button>

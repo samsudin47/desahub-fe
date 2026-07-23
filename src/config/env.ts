@@ -2,6 +2,9 @@ import { API_PREFIXES, type ApiServiceKey } from "./api-prefixes";
 
 export const env = {
   apiBaseUrl: process.env.NEXT_PUBLIC_API_URL ?? "",
+  midtransSnapUrl:
+    process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL ??
+    "https://app.sandbox.midtrans.com/snap/snap.js",
 } as const;
 
 function buildServiceUrl(service: ApiServiceKey, path: string): string {

@@ -1,61 +1,66 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import CartItemList from "@/components/marketplace/cart/CartItemList";
 import OrderSummary from "@/components/marketplace/cart/OrderSummary";
-import CheckoutInfoCard, {
-  type CheckoutShippingFormHandle,
-} from "@/components/marketplace/checkout/CheckoutInfoCard";
+import CheckoutInfoCard from "@/components/marketplace/checkout/CheckoutInfoCard";
 import CheckoutSteps from "@/components/marketplace/checkout/CheckoutSteps";
 import MktButton from "@/components/marketplace/ui/MktButton";
 import { useCheckoutFlow } from "@/context/CheckoutContext";
 import { mapCheckoutDatasToItems } from "@/lib/map-marketplace-checkout";
+import { getApiErrorMessage } from "@/lib/api-message";
 import { getPembayaranPagePath } from "@/lib/checkout-routes";
-import { showErrorToast, showSuccessToast } from "@/lib/toast";
+import { showErrorToast } from "@/lib/toast";
 import {
   fetchCheckout,
-  updateCheckoutShipping,
+  fetchCheckoutShipping,
 } from "@/services/checkout.service";
 import type { CheckoutDatas } from "@/types/checkout";
-import { ApiError } from "@/types/api";
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof ApiError) return error.message;
-  if (error instanceof Error) return error.message;
-  return fallback;
-}
 
 export default function CheckoutDetailPage() {
   const router = useRouter();
   const params = useParams<{ uuid: string }>();
   const { clearActiveCheckout, setActiveCheckout } = useCheckoutFlow();
-  const shippingFormRef = useRef<CheckoutShippingFormHandle>(null);
   const [checkout, setCheckout] = useState<CheckoutDatas | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutUuid, setCheckoutUuid] = useState("");
+  const [hasSavedShipping, setHasSavedShipping] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     const uuid = params.uuid;
     setCheckoutUuid(uuid);
     setIsLoading(true);
+    setHasSavedShipping(false);
 
     void (async () => {
       try {
-        const datas = await fetchCheckout(uuid);
+        const [checkoutResult, shippingResult] = await Promise.allSettled([
+          fetchCheckout(uuid),
+          fetchCheckoutShipping(uuid),
+        ]);
         if (!isMounted) return;
 
+        if (checkoutResult.status === "rejected") {
+          showErrorToast(
+            getApiErrorMessage(checkoutResult.reason, "Gagal memuat checkout"),
+          );
+          return;
+        }
+
+        const datas = checkoutResult.value;
         setCheckout(datas);
+
+        if (shippingResult.status === "fulfilled") {
+          setHasSavedShipping(true);
+        }
+
         if (datas.status === "pending") {
           setActiveCheckout({ uuid: datas.uuid, status: datas.status });
         } else {
           clearActiveCheckout();
         }
-      } catch (error) {
-        if (!isMounted) return;
-        showErrorToast(getErrorMessage(error, "Gagal memuat checkout"));
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -68,26 +73,15 @@ export default function CheckoutDetailPage() {
     };
   }, [clearActiveCheckout, params, setActiveCheckout]);
 
-  const handleContinueToPayment = async () => {
-    if (!checkout || checkout.status === "cancelled" || isSubmitting) return;
+  const handleContinueToPayment = () => {
+    if (!checkout || checkout.status === "cancelled") return;
 
-    const payload = shippingFormRef.current?.validateAndGetPayload();
-    if (!payload) {
-      showErrorToast("Lengkapi data pengiriman terlebih dahulu");
+    if (!hasSavedShipping) {
+      showErrorToast("Simpan alamat pengiriman terlebih dahulu");
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const result = await updateCheckoutShipping(checkout.uuid, payload);
-      showSuccessToast(result.message);
-      router.push(getPembayaranPagePath(checkout.uuid));
-    } catch (error) {
-      shippingFormRef.current?.applyApiError(error);
-      showErrorToast(getErrorMessage(error, "Gagal menyimpan data pengiriman"));
-    } finally {
-      setIsSubmitting(false);
-    }
+    router.push(getPembayaranPagePath(checkout.uuid));
   };
 
   if (isLoading) {
@@ -109,10 +103,7 @@ export default function CheckoutDetailPage() {
   }
 
   const items = mapCheckoutDatasToItems(checkout);
-  const continueDisabled = checkout.status === "cancelled" || isSubmitting;
-  const continueLabel = isSubmitting
-    ? "Menyimpan..."
-    : "Lanjut ke Pembayaran";
+  const continueDisabled = checkout.status === "cancelled" || !hasSavedShipping;
 
   return (
     <div className="space-y-6 pb-24 sm:space-y-8 lg:pb-0">
@@ -131,10 +122,10 @@ export default function CheckoutDetailPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <CheckoutInfoCard
-            ref={shippingFormRef}
             checkoutUuid={checkoutUuid}
             status={checkout.status}
-            disabled={checkout.status === "cancelled" || isSubmitting}
+            disabled={checkout.status === "cancelled"}
+            onShippingSaved={() => setHasSavedShipping(true)}
           />
 
           <div>
@@ -148,9 +139,9 @@ export default function CheckoutDetailPage() {
           <MktButton
             className="hidden w-full lg:inline-flex"
             disabled={continueDisabled}
-            onClick={() => void handleContinueToPayment()}
+            onClick={handleContinueToPayment}
           >
-            {continueLabel}
+            Lanjut ke Pembayaran
           </MktButton>
         </div>
       </div>
@@ -159,9 +150,9 @@ export default function CheckoutDetailPage() {
         <MktButton
           className="w-full"
           disabled={continueDisabled}
-          onClick={() => void handleContinueToPayment()}
+          onClick={handleContinueToPayment}
         >
-          {continueLabel}
+          Lanjut ke Pembayaran
         </MktButton>
       </div>
     </div>

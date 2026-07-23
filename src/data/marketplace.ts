@@ -47,6 +47,7 @@ export interface CartItem {
   product: Product;
   quantity: number;
   subtotal: number;
+  sisaStock?: number;
 }
 
 export interface Order {

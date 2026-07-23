@@ -1,26 +1,20 @@
 "use client";
 
-import {
-  forwardRef,
-  useImperativeHandle,
-  useState,
-  type ChangeEvent,
-} from "react";
+import { useState, type ChangeEvent } from "react";
 import { Loader2, MapPin } from "lucide-react";
 import MktButton from "@/components/marketplace/ui/MktButton";
+import { getApiErrorMessage } from "@/lib/api-message";
 import { mapStructuredApiError } from "@/lib/api-form-errors";
 import { cn } from "@/lib/cn";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
+import { updateCheckoutShipping } from "@/services/checkout.service";
 import type { CheckoutShippingPayload } from "@/types/checkout";
-
-export type CheckoutShippingFormHandle = {
-  validateAndGetPayload: () => CheckoutShippingPayload | null;
-  applyApiError: (error: unknown) => void;
-};
 
 type CheckoutInfoCardProps = {
   checkoutUuid: string;
   status: string;
   disabled?: boolean;
+  onShippingSaved?: () => void;
 };
 
 type LocationCoords = {
@@ -41,19 +35,19 @@ const inputClassName =
 
 const errorInputClassName = "border-red-300 focus:border-red-400 focus:ring-red-100";
 
-const CheckoutInfoCard = forwardRef<
-  CheckoutShippingFormHandle,
-  CheckoutInfoCardProps
->(function CheckoutInfoCard(
-  { checkoutUuid, status, disabled = false },
-  ref,
-) {
+export default function CheckoutInfoCard({
+  checkoutUuid,
+  status,
+  disabled = false,
+  onShippingSaved,
+}: CheckoutInfoCardProps) {
   const [namaPenerima, setNamaPenerima] = useState("");
   const [nomorHpPenerima, setNomorHpPenerima] = useState("");
   const [alamatPengiriman, setAlamatPengiriman] = useState("");
   const [location, setLocation] = useState<LocationCoords | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<ShippingFieldErrors>({});
   const [formError, setFormError] = useState("");
 
@@ -66,53 +60,52 @@ const CheckoutInfoCard = forwardRef<
     });
   };
 
-  useImperativeHandle(ref, () => ({
-    validateAndGetPayload: () => {
-      const nextErrors: ShippingFieldErrors = {};
-      const nama = namaPenerima.trim();
-      const noHp = nomorHpPenerima.trim();
-      const alamat = alamatPengiriman.trim();
+  const validateAndGetPayload = (): CheckoutShippingPayload | null => {
+    const nextErrors: ShippingFieldErrors = {};
+    const nama = namaPenerima.trim();
+    const noHp = nomorHpPenerima.trim();
+    const alamat = alamatPengiriman.trim();
 
-      if (!nama) nextErrors.nama_penerima = "Nama penerima wajib diisi.";
-      if (!noHp) nextErrors.no_hp_penerima = "Nomor HP penerima wajib diisi.";
-      if (!alamat) nextErrors.alamat_penerima = "Alamat pengiriman wajib diisi.";
-      if (!location) {
-        nextErrors.location = "Bagikan lokasi pengiriman terlebih dahulu.";
-      }
+    if (!nama) nextErrors.nama_penerima = "Nama penerima wajib diisi.";
+    if (!noHp) nextErrors.no_hp_penerima = "Nomor HP penerima wajib diisi.";
+    if (!alamat) nextErrors.alamat_penerima = "Alamat pengiriman wajib diisi.";
+    if (!location) {
+      nextErrors.location = "Bagikan lokasi pengiriman terlebih dahulu.";
+    }
 
-      setFieldErrors(nextErrors);
-      setFormError("");
+    setFieldErrors(nextErrors);
+    setFormError("");
 
-      if (Object.keys(nextErrors).length > 0 || !location) {
-        return null;
-      }
+    if (Object.keys(nextErrors).length > 0 || !location) {
+      return null;
+    }
 
-      return {
-        nama_penerima: nama,
-        no_hp_penerima: noHp,
-        alamat_penerima: alamat,
-        latitude: location.latitude,
-        longitude: location.longitude,
-      };
-    },
-    applyApiError: (error: unknown) => {
-      const { fieldErrors: apiFieldErrors, formError: apiFormError } =
-        mapStructuredApiError<ShippingField>(
-          error,
-          {
-            nama_penerima: "nama_penerima",
-            no_hp_penerima: "no_hp_penerima",
-            alamat_penerima: "alamat_penerima",
-            latitude: "location",
-            longitude: "location",
-          },
-          "Gagal menyimpan data pengiriman",
-        );
+    return {
+      nama_penerima: nama,
+      no_hp_penerima: noHp,
+      alamat_penerima: alamat,
+      latitude: location.latitude,
+      longitude: location.longitude,
+    };
+  };
 
-      setFieldErrors(apiFieldErrors);
-      setFormError(apiFormError);
-    },
-  }));
+  const applyApiError = (error: unknown) => {
+    const { fieldErrors: apiFieldErrors, formError: apiFormError } =
+      mapStructuredApiError<ShippingField>(
+        error,
+        {
+          nama_penerima: "nama_penerima",
+          no_hp_penerima: "no_hp_penerima",
+          alamat_penerima: "alamat_penerima",
+          latitude: "location",
+          longitude: "location",
+        },
+        "Gagal menyimpan data pengiriman",
+      );
+
+    setFieldErrors(apiFieldErrors);
+    setFormError(apiFormError);
+  };
 
   const handleShareLocation = () => {
     if (disabled || typeof window === "undefined") return;
@@ -150,6 +143,28 @@ const CheckoutInfoCard = forwardRef<
         maximumAge: 0,
       },
     );
+  };
+
+  const handleSaveAddress = async () => {
+    if (disabled || isSaving) return;
+
+    const payload = validateAndGetPayload();
+    if (!payload) {
+      showErrorToast("Lengkapi data pengiriman terlebih dahulu");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const result = await updateCheckoutShipping(checkoutUuid, payload);
+      showSuccessToast(result.message);
+      onShippingSaved?.();
+    } catch (error) {
+      applyApiError(error);
+      showErrorToast(getApiErrorMessage(error, "Gagal menyimpan data pengiriman"));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const mapsUrl = location
@@ -190,7 +205,7 @@ const CheckoutInfoCard = forwardRef<
               clearFieldError("nama_penerima");
             }}
             placeholder="Masukkan nama penerima"
-            disabled={disabled}
+            disabled={disabled || isSaving}
             className={cn(
               inputClassName,
               fieldErrors.nama_penerima && errorInputClassName,
@@ -218,7 +233,7 @@ const CheckoutInfoCard = forwardRef<
               clearFieldError("no_hp_penerima");
             }}
             placeholder="Masukkan nomor hp penerima"
-            disabled={disabled}
+            disabled={disabled || isSaving}
             className={cn(
               inputClassName,
               fieldErrors.no_hp_penerima && errorInputClassName,
@@ -247,7 +262,7 @@ const CheckoutInfoCard = forwardRef<
               clearFieldError("alamat_penerima");
             }}
             placeholder="Contoh: Jl. Melati No. 12, RT 02/RW 01, Desa Sukamaju"
-            disabled={disabled}
+            disabled={disabled || isSaving}
             rows={3}
             className={cn(
               inputClassName,
@@ -272,26 +287,40 @@ const CheckoutInfoCard = forwardRef<
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-            <MktButton
-              type="button"
-              variant="outline"
-              className="w-full sm:w-auto"
-              disabled={disabled || isLocating}
-              onClick={handleShareLocation}
-              startIcon={
-                isLocating ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <MapPin className="size-4" />
-                )
-              }
-            >
-              {isLocating
-                ? "Mengambil lokasi..."
-                : location
-                  ? "Perbarui Lokasi"
-                  : "Bagikan Lokasi"}
-            </MktButton>
+            <div className="flex w-full flex-col gap-2 sm:w-auto">
+              <MktButton
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                disabled={disabled || isLocating || isSaving}
+                onClick={handleShareLocation}
+                startIcon={
+                  isLocating ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <MapPin className="size-4" />
+                  )
+                }
+              >
+                {isLocating
+                  ? "Mengambil lokasi..."
+                  : location
+                    ? "Perbarui Lokasi"
+                    : "Bagikan Lokasi"}
+              </MktButton>
+
+              <MktButton
+                type="button"
+                className="w-full sm:w-auto"
+                disabled={disabled || isSaving || isLocating}
+                onClick={() => void handleSaveAddress()}
+                startIcon={
+                  isSaving ? <Loader2 className="size-4 animate-spin" /> : undefined
+                }
+              >
+                {isSaving ? "Menyimpan..." : "Tambah Alamat"}
+              </MktButton>
+            </div>
 
             {location && (
               <div className="min-w-0 flex-1 rounded-lg border border-desahub-100 bg-desahub-50 px-3 py-2.5 text-sm">
@@ -328,6 +357,4 @@ const CheckoutInfoCard = forwardRef<
       </div>
     </div>
   );
-});
-
-export default CheckoutInfoCard;
+}

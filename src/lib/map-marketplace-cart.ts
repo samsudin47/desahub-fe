@@ -7,6 +7,7 @@ export function mapCartItemApiToCartItem(item: CartItemApi): CartItem {
     product: mapCartItemToProduct(item),
     quantity: item.quantity,
     subtotal: item.subtotal,
+    sisaStock: item.produk.sisa_stock,
   };
 }
 

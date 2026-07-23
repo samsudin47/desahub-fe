@@ -12,6 +12,7 @@ import {
 import type { CartItem, Product } from "@/data/marketplace";
 import { mapCartDatasToItems } from "@/lib/map-marketplace-cart";
 import { getAuthToken } from "@/lib/auth-session";
+import { getApiErrorMessage } from "@/lib/api-message";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import {
   addCartItem,
@@ -20,7 +21,6 @@ import {
   increaseCartItem,
   removeCartItem,
 } from "@/services/cart.service";
-import { ApiError } from "@/types/api";
 import type { CartDatas } from "@/types/cart";
 
 interface CartContextValue {
@@ -49,12 +49,6 @@ function applyCartDatas(
     itemCount: datas.total_item,
     total: datas.total_harga,
   });
-}
-
-function getCartErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof ApiError) return error.message;
-  if (error instanceof Error) return error.message;
-  return fallback;
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -107,7 +101,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         showSuccessToast(result.message);
       } catch (error) {
         showErrorToast(
-          getCartErrorMessage(error, "Gagal menambahkan ke keranjang"),
+          getApiErrorMessage(error, "Gagal menambahkan ke keranjang"),
         );
         throw error;
       } finally {
@@ -125,7 +119,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         showSuccessToast(result.message);
       } catch (error) {
         showErrorToast(
-          getCartErrorMessage(error, "Gagal menghapus item keranjang"),
+          getApiErrorMessage(error, "Gagal menghapus item keranjang"),
         );
         throw error;
       }
@@ -141,7 +135,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         showSuccessToast(result.message);
       } catch (error) {
         showErrorToast(
-          getCartErrorMessage(error, "Gagal menambah jumlah item"),
+          getApiErrorMessage(error, "Gagal menambah jumlah item"),
         );
         throw error;
       }
@@ -157,7 +151,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         showSuccessToast(result.message);
       } catch (error) {
         showErrorToast(
-          getCartErrorMessage(error, "Gagal mengurangi jumlah item"),
+          getApiErrorMessage(error, "Gagal mengurangi jumlah item"),
         );
         throw error;
       }

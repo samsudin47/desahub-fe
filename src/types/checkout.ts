@@ -44,3 +44,30 @@ export type CheckoutShippingDatas = {
   latitude: string;
   longitude: string;
 };
+
+export type CheckoutPaymentStatus =
+  | "pending"
+  | "paid"
+  | "failed"
+  | "expired"
+  | "cancelled"
+  | string;
+
+export type CheckoutPaymentDatas = {
+  uuid: string;
+  uuid_checkout: string;
+  order_id: string;
+  snap_token: string;
+  client_key: string;
+  is_production: boolean;
+  gross_amount: number;
+  payment_type: string | null;
+  bank: string | null;
+  va_number: string | null;
+  bill_key: string | null;
+  biller_code: string | null;
+  transaction_status: string | null;
+  status: CheckoutPaymentStatus;
+  expired_at: string | null;
+  paid_at: string | null;
+};

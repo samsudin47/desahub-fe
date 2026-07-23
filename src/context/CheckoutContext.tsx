@@ -17,9 +17,9 @@ import {
   CART_PAGE_PATH,
   isCheckoutFlowPath,
 } from "@/lib/checkout-routes";
+import { getApiErrorMessage } from "@/lib/api-message";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { cancelCheckout, createCheckout } from "@/services/checkout.service";
-import { ApiError } from "@/types/api";
 import type { CheckoutDatas } from "@/types/checkout";
 import { useCart } from "@/context/CartContext";
 
@@ -47,12 +47,6 @@ const CheckoutContext = createContext<CheckoutContextValue | null>(null);
 const initialLeavePrompt: LeavePromptState = {
   isOpen: false,
 };
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof ApiError) return error.message;
-  if (error instanceof Error) return error.message;
-  return fallback;
-}
 
 function readStoredCheckoutUuid(): string | null {
   if (typeof window === "undefined") return null;
@@ -132,7 +126,7 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
       showSuccessToast(result.message);
       return result.data;
     } catch (error) {
-      showErrorToast(getErrorMessage(error, "Gagal membuat checkout"));
+      showErrorToast(getApiErrorMessage(error, "Gagal membuat checkout"));
       throw error;
     } finally {
       setIsSubmitting(false);
@@ -168,7 +162,7 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
       closeLeavePrompt();
       router.push(CART_PAGE_PATH);
     } catch (error) {
-      showErrorToast(getErrorMessage(error, "Gagal membatalkan checkout"));
+      showErrorToast(getApiErrorMessage(error, "Gagal membatalkan checkout"));
     } finally {
       isCancellingRef.current = false;
       setIsCancellingLeave(false);

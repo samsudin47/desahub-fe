@@ -8,6 +8,7 @@ export type CartProduk = {
     nama_produk: string;
     harga: number;
     stock: number;
+    sisa_stock?: number;
     gambar: string;
     penjual: CartPenjual;
 };

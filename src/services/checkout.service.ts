@@ -4,6 +4,7 @@ import { apiRequest } from "@/lib/api-client";
 import type {
   CancelCheckoutDatas,
   CheckoutDatas,
+  CheckoutPaymentDatas,
   CheckoutShippingDatas,
   CheckoutShippingPayload,
   CreateCheckoutPayload,
@@ -57,6 +58,17 @@ export async function cancelCheckout(
   };
 }
 
+export async function fetchCheckoutShipping(
+  uuid: string,
+): Promise<CheckoutShippingDatas> {
+  const response = await apiRequest<CheckoutShippingDatas>(
+    getMarketplaceUmkmUrl(`${CHECKOUT_PATH}/${uuid}/shipping`),
+    { method: "GET" },
+  );
+
+  return response.datas;
+}
+
 export async function updateCheckoutShipping(
   uuid: string,
   payload: CheckoutShippingPayload,
@@ -73,4 +85,29 @@ export async function updateCheckoutShipping(
     data: response.datas,
     message: getApiSuccessMessage(response),
   };
+}
+
+export async function createCheckoutPayment(
+  uuid: string,
+): Promise<CheckoutMutationResult<CheckoutPaymentDatas>> {
+  const response = await apiRequest<CheckoutPaymentDatas>(
+    getMarketplaceUmkmUrl(`${CHECKOUT_PATH}/${uuid}/pay`),
+    { method: "POST" },
+  );
+
+  return {
+    data: response.datas,
+    message: getApiSuccessMessage(response),
+  };
+}
+
+export async function fetchCheckoutPayment(
+  uuid: string,
+): Promise<CheckoutPaymentDatas> {
+  const response = await apiRequest<CheckoutPaymentDatas>(
+    getMarketplaceUmkmUrl(`${CHECKOUT_PATH}/${uuid}/payment`),
+    { method: "GET" },
+  );
+
+  return response.datas;
 }

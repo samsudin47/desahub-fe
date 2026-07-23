@@ -78,6 +78,14 @@ function extractErrorMessage(
   payload: ApiErrorResponse | null,
   fallback: string,
 ): string {
+  const validationMessages =
+    payload?.validationFailed?.map((message) => message.trim()).filter(Boolean) ??
+    [];
+
+  if (validationMessages.length > 0) {
+    return validationMessages.join(" ");
+  }
+
   return (
     payload?.message ??
     payload?.description ??
