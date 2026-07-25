@@ -26,7 +26,14 @@ export default function CheckoutShippingInfo({
   shipping,
   className,
 }: CheckoutShippingInfoProps) {
-  const mapsUrl = `https://www.google.com/maps?q=${shipping.latitude},${shipping.longitude}`;
+  const hasLocation =
+    shipping.latitude != null &&
+    shipping.longitude != null &&
+    shipping.latitude !== "" &&
+    shipping.longitude !== "";
+  const mapsUrl = hasLocation
+    ? `https://www.google.com/maps?q=${shipping.latitude},${shipping.longitude}`
+    : null;
 
   return (
     <div className={cn("border-t border-gray-100 pt-4", className)}>
@@ -39,22 +46,24 @@ export default function CheckoutShippingInfo({
         <ShippingRow label="Nama Penerima" value={shipping.nama_penerima} />
         <ShippingRow label="No. HP" value={shipping.no_hp_penerima} />
         <ShippingRow label="Alamat" value={shipping.alamat_penerima} />
-        <div className="flex justify-between gap-4">
-          <dt className="shrink-0 text-gray-600">Lokasi</dt>
-          <dd className="text-right">
-            <p className="break-all font-medium text-gray-900">
-              {shipping.latitude}, {shipping.longitude}
-            </p>
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 inline-block text-xs font-medium text-desahub-600 underline-offset-2 hover:underline"
-            >
-              Lihat di peta
-            </a>
-          </dd>
-        </div>
+        {hasLocation && mapsUrl && (
+          <div className="flex justify-between gap-4">
+            <dt className="shrink-0 text-gray-600">Lokasi</dt>
+            <dd className="text-right">
+              <p className="break-all font-medium text-gray-900">
+                {shipping.latitude}, {shipping.longitude}
+              </p>
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-block text-xs font-medium text-desahub-600 underline-offset-2 hover:underline"
+              >
+                Lihat di peta
+              </a>
+            </dd>
+          </div>
+        )}
       </dl>
     </div>
   );

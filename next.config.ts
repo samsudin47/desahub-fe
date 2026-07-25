@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
         hostname: "localhost",
         pathname: "/storage/**",
       },
+      {
+        // IP Lan
+        protocol: "http",
+        hostname: "10.142.134.193",
+        port: "8000",
+        pathname: "/storage/**",
+      },
     ],
   },
   /* config options here */

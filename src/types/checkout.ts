@@ -31,8 +31,8 @@ export type CheckoutShippingPayload = {
   nama_penerima: string;
   no_hp_penerima: string;
   alamat_penerima: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type CheckoutShippingDatas = {
@@ -41,8 +41,8 @@ export type CheckoutShippingDatas = {
   nama_penerima: string;
   no_hp_penerima: string;
   alamat_penerima: string;
-  latitude: string;
-  longitude: string;
+  latitude: string | null;
+  longitude: string | null;
 };
 
 export type CheckoutPaymentStatus =

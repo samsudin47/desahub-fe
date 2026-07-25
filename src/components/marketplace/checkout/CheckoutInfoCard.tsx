@@ -69,14 +69,11 @@ export default function CheckoutInfoCard({
     if (!nama) nextErrors.nama_penerima = "Nama penerima wajib diisi.";
     if (!noHp) nextErrors.no_hp_penerima = "Nomor HP penerima wajib diisi.";
     if (!alamat) nextErrors.alamat_penerima = "Alamat pengiriman wajib diisi.";
-    if (!location) {
-      nextErrors.location = "Bagikan lokasi pengiriman terlebih dahulu.";
-    }
 
     setFieldErrors(nextErrors);
     setFormError("");
 
-    if (Object.keys(nextErrors).length > 0 || !location) {
+    if (Object.keys(nextErrors).length > 0) {
       return null;
     }
 
@@ -84,8 +81,10 @@ export default function CheckoutInfoCard({
       nama_penerima: nama,
       no_hp_penerima: noHp,
       alamat_penerima: alamat,
-      latitude: location.latitude,
-      longitude: location.longitude,
+      ...(location && {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      }),
     };
   };
 
@@ -283,7 +282,8 @@ export default function CheckoutInfoCard({
             Lokasi Pengiriman
           </span>
           <p className="mb-3 text-xs text-gray-500">
-            Bagikan lokasi untuk membantu penjual menemukan alamat pengiriman.
+            Opsional. Bagikan lokasi untuk membantu penjual menemukan alamat
+            pengiriman.
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
