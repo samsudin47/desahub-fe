@@ -66,7 +66,6 @@ function safeHideSnap(snap?: MidtransSnap) {
 function safeInitSnap(snap: MidtransSnap, clientKey: string) {
   if (snapInitialized) return;
   if (typeof snap.init !== "function") {
-    // Script baru biasanya sudah auto-init; anggap siap.
     snapInitialized = true;
     return;
   }
@@ -74,7 +73,6 @@ function safeInitSnap(snap: MidtransSnap, clientKey: string) {
   try {
     snap.init(clientKey);
   } catch {
-    // Sudah initialized (mis. setelah HMR) — anggap siap.
   }
   snapInitialized = true;
 }
@@ -132,7 +130,6 @@ export async function loadMidtransSnap(clientKey: string): Promise<MidtransSnap>
       throw new Error("Midtrans Snap gagal diinisialisasi");
     }
 
-    // Script auto-calls init on load; keep our flag in sync.
     snapInitialized = true;
     return window.snap;
   })();
@@ -152,14 +149,12 @@ export async function embedMidtransSnap(
   const runEmbed = async () => {
     const snap = await loadMidtransSnap(payment.client_key);
 
-    // Embed hanya boleh dari state initialized. Tutup sesi sebelumnya dulu.
     safeHideSnap(snap);
     safeInitSnap(snap, payment.client_key);
 
     const container = await waitForElement(embedId);
     container.replaceChildren();
 
-    // Tunggu 1 frame agar DOM container siap menerima iframe Snap.
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => resolve());
     });
@@ -186,7 +181,6 @@ export async function embedMidtransSnap(
           throw error;
         }
 
-        // Pulihkan state Snap lalu coba sekali lagi.
         destroyMidtransSnap({ hard: true });
         const existing = document.getElementById(SNAP_SCRIPT_ID);
         existing?.remove();
@@ -201,7 +195,6 @@ export async function embedMidtransSnap(
   await embedQueue;
 }
 
-/** Soft cleanup: keep Snap initialized so embed can run again safely. */
 export function destroyMidtransSnap(options: { hard?: boolean } = {}) {
   if (typeof window === "undefined") return;
 
@@ -211,7 +204,6 @@ export function destroyMidtransSnap(options: { hard?: boolean } = {}) {
     try {
       window.snap?.reset?.();
     } catch {
-      // ignore invalid transition
     }
     snapInitialized = false;
   }

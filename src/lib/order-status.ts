@@ -5,7 +5,6 @@ export type OrderListTab = {
   label: string;
 };
 
-/** Filter tabs mapped to BE `status` query param. */
 export const ORDER_LIST_TABS: readonly OrderListTab[] = [
   { value: "all", label: "Semua" },
   { value: "pending", label: "Menunggu Bayar" },
@@ -14,32 +13,33 @@ export const ORDER_LIST_TABS: readonly OrderListTab[] = [
   { value: "cancelled", label: "Dibatalkan" },
 ] as const;
 
-const ORDER_STATUS_STYLE: Record<string, string> = {
-  // BE statuses
-  draft: "bg-gray-50 text-gray-600",
-  pending: "bg-orange-50 text-orange-600",
-  paid: "bg-blue-light-50 text-blue-light-600",
-  failed: "bg-error-50 text-error-600",
-  cancelled: "bg-error-50 text-error-600",
-  // Future / fulfillment (if BE adds later)
-  shipping: "bg-desahub-50 text-desahub-600",
-  completed: "bg-success-50 text-success-600",
-  // Legacy mock UI statuses (admin / detail mock)
-  menunggu_pembayaran: "bg-orange-50 text-orange-600",
-  diproses: "bg-blue-light-50 text-blue-light-600",
-  dikirim: "bg-desahub-50 text-desahub-600",
-  selesai: "bg-success-50 text-success-600",
-  dibatalkan: "bg-error-50 text-error-600",
+export type AdminOrderListTab = OrderListTab & {
+  statuses: readonly string[] | null;
 };
+
+export const ADMIN_ORDER_LIST_TABS: readonly AdminOrderListTab[] = [
+  { value: "all", label: "Semua", statuses: null },
+  { value: "pending", label: "Menunggu", statuses: ["pending"] },
+  {
+    value: "processing",
+    label: "Diproses",
+    statuses: ["paid", "processing"],
+  },
+  { value: "shipped", label: "Dikirim", statuses: ["shipped"] },
+  { value: "completed", label: "Selesai", statuses: ["completed"] },
+  { value: "cancelled", label: "Dibatalkan", statuses: ["cancelled"] },
+] as const;
 
 const ORDER_STATUS_FALLBACK_LABEL: Record<string, string> = {
   draft: "Draft",
   pending: "Menunggu Pembayaran",
   paid: "Diproses",
-  failed: "Gagal",
-  cancelled: "Dibatalkan",
+  processing: "Diproses",
+  shipped: "Dikirim",
   shipping: "Dikirim",
   completed: "Selesai",
+  failed: "Gagal",
+  cancelled: "Dibatalkan",
   menunggu_pembayaran: "Menunggu Pembayaran",
   diproses: "Diproses",
   dikirim: "Dikirim",
@@ -47,10 +47,34 @@ const ORDER_STATUS_FALLBACK_LABEL: Record<string, string> = {
   dibatalkan: "Dibatalkan",
 };
 
-const DEFAULT_STATUS_STYLE = "bg-gray-50 text-gray-600";
+export type OrderBadgeColor =
+  | "primary"
+  | "success"
+  | "error"
+  | "warning"
+  | "info"
+  | "light"
+  | "dark";
 
-export function getOrderStatusStyle(status: string): string {
-  return ORDER_STATUS_STYLE[status] ?? DEFAULT_STATUS_STYLE;
+const ORDER_BADGE_COLOR: Record<string, OrderBadgeColor> = {
+  draft: "light",
+  pending: "warning",
+  paid: "info",
+  processing: "info",
+  shipped: "primary",
+  shipping: "primary",
+  completed: "success",
+  failed: "error",
+  cancelled: "error",
+  menunggu_pembayaran: "warning",
+  diproses: "info",
+  dikirim: "primary",
+  selesai: "success",
+  dibatalkan: "error",
+};
+
+export function getOrderBadgeColor(status: string): OrderBadgeColor {
+  return ORDER_BADGE_COLOR[status] ?? "light";
 }
 
 export function getOrderStatusLabel(
@@ -60,4 +84,21 @@ export function getOrderStatusLabel(
   const fromApi = statusLabel?.trim();
   if (fromApi) return fromApi;
   return ORDER_STATUS_FALLBACK_LABEL[status] ?? status;
+}
+
+export function matchesAdminOrderTab(
+  status: string,
+  tab: AdminOrderListTab,
+): boolean {
+  if (!tab.statuses) return true;
+  return tab.statuses.includes(status);
+}
+
+export function getAdminOrderActions(status: string) {
+  return {
+    canProcess: status === "paid",
+    canShip: status === "processing",
+    canComplete: status === "shipped",
+    canCancel: ["pending", "paid", "processing"].includes(status),
+  };
 }
