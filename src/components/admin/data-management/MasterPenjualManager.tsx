@@ -4,10 +4,11 @@ import MasterPenjualTable from "@/components/admin/data-management/MasterPenjual
 import Input from "@/components/form/input/InputField";
 import TextArea from "@/components/form/input/TextArea";
 import Label from "@/components/form/Label";
+import Pagination from "@/components/tables/Pagination";
 import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
-import { useMasterPenjualList } from "@/hooks/useMasterPenjualList";
+import { useMasterPenjualPaginated } from "@/hooks/useMasterPenjualPaginated";
 import { useModal } from "@/hooks/useModal";
 import { mapMasterPenjualApiError } from "@/lib/master-penjual-errors";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
@@ -31,7 +32,17 @@ const emptyForm: MasterPenjualFormData = {
 };
 
 export default function MasterPenjualManager() {
-  const { items, isLoading, error, refetch } = useMasterPenjualList();
+  const {
+    items,
+    pagination,
+    page,
+    setPage,
+    search,
+    setSearch,
+    isLoading,
+    error,
+    refetch,
+  } = useMasterPenjualPaginated();
   const [form, setForm] = useState<MasterPenjualFormData>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingItem, setDeletingItem] = useState<MasterPenjual | null>(null);
@@ -132,6 +143,7 @@ export default function MasterPenjualManager() {
   };
 
   const isFormValid = form.nama_penjual.trim().length > 0;
+  const showPagination = pagination.lastPage > 1;
 
   return (
     <div className="space-y-6">
@@ -143,12 +155,21 @@ export default function MasterPenjualManager() {
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {isLoading
               ? "Memuat data..."
-              : `${items.length} penjual terdaftar`}
+              : `${pagination.total} penjual terdaftar`}
           </p>
         </div>
         <Button size="sm" onClick={openAddModal} disabled={isLoading}>
           + Tambah Penjual
         </Button>
+      </div>
+
+      <div className="max-w-md">
+        <Input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Cari penjual..."
+        />
       </div>
 
       {error && (
@@ -162,11 +183,22 @@ export default function MasterPenjualManager() {
           </p>
         </div>
       ) : (
-        <MasterPenjualTable
-          items={items}
-          onEdit={openEditModal}
-          onDelete={openDeleteModal}
-        />
+        <>
+          <MasterPenjualTable
+            items={items}
+            onEdit={openEditModal}
+            onDelete={openDeleteModal}
+          />
+          {showPagination && (
+            <div className="flex justify-end">
+              <Pagination
+                currentPage={page}
+                totalPages={pagination.lastPage}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
+        </>
       )}
 
       <Modal

@@ -1,6 +1,12 @@
 import { getDataManagementUrl } from "@/config/env";
 import { getApiSuccessMessage } from "@/lib/api-message";
 import { apiRequest } from "@/lib/api-client";
+import {
+  buildListQuery,
+  DEFAULT_LIST_PER_PAGE,
+  emptyPagination,
+} from "@/lib/api-query";
+import type { ApiListParams, ApiPaginatedResult } from "@/types/api";
 import type {
   MasterKategori,
   MasterKategoriFormData,
@@ -24,6 +30,7 @@ function toFormBody(data: MasterKategoriFormData): Record<string, string> {
   };
 }
 
+/** Unpaginated-style fetch for dropdowns / consumers that need a simple array. */
 export async function fetchMasterKategoriList(): Promise<MasterKategori[]> {
   const response = await apiRequest<MasterKategoriListDatas>(
     getDataManagementUrl(MASTER_KATEGORI_PATH),
@@ -31,6 +38,23 @@ export async function fetchMasterKategoriList(): Promise<MasterKategori[]> {
   );
 
   return response.datas.master_kategori ?? [];
+}
+
+export async function fetchMasterKategoriPage(
+  params: ApiListParams = {},
+): Promise<ApiPaginatedResult<MasterKategori>> {
+  const perPage = params.perPage ?? DEFAULT_LIST_PER_PAGE;
+  const response = await apiRequest<MasterKategoriListDatas>(
+    getDataManagementUrl(
+      `${MASTER_KATEGORI_PATH}${buildListQuery({ ...params, perPage })}`,
+    ),
+    { method: "GET" },
+  );
+
+  return {
+    items: response.datas.master_kategori ?? [],
+    pagination: response.pagination ?? emptyPagination(perPage),
+  };
 }
 
 export async function createMasterKategori(

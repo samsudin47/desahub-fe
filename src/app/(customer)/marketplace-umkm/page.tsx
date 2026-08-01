@@ -54,7 +54,7 @@ export default function MarketplaceHomePage() {
 
         products={featured}
 
-        viewAllHref="/marketplace-umkm/kategori/makanan"
+        viewAllHref="/marketplace-umkm/kategori"
 
       />
 

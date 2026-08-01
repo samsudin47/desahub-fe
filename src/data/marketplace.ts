@@ -325,14 +325,6 @@ export function getUniqueSellers(): Seller[] {
     });
 }
 
-export function getProductsBySeller(sellerId: string): Product[] {
-  return products.filter((p) => p.seller.id === sellerId);
-}
-
-export function getProductCountByCategory(slug: ProductCategory): number {
-  return products.filter((p) => p.category === slug).length;
-}
-
 export function getMarketplaceStats() {
   const uniqueSellers = getUniqueSellers();
   const totalRevenue = mockOrders.reduce((sum, o) => sum + o.total, 0);

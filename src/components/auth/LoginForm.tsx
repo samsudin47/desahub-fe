@@ -4,8 +4,8 @@ import AuthDivider from "@/components/auth/AuthDivider";
 import AuthPageShell from "@/components/auth/AuthPageShell";
 import { AuthField, PasswordField } from "@/components/auth/AuthField";
 import SsoButtons from "@/components/auth/SsoButtons";
-import Checkbox from "@/components/form/input/Checkbox";
 import MktButton from "@/components/marketplace/ui/MktButton";
+import { FORGOT_PASSWORD_PATH, REGISTER_PATH } from "@/config/auth-routes";
 import { mapLoginApiError } from "@/lib/auth-errors";
 import { getPostLoginPath, getSafeRedirectPath, login } from "@/services/auth.service";
 import type { LoginFormData } from "@/types/auth";
@@ -21,9 +21,8 @@ export default function LoginForm() {
   const [form, setForm] = useState<LoginFormData>({
     username: "",
     password: "",
-  });
+  }); 
   const [errors, setErrors] = useState<FormErrors>({});
-  const [rememberMe, setRememberMe] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -64,7 +63,7 @@ export default function LoginForm() {
       footer={
         <p className="text-center text-sm text-gray-600 sm:text-left">
           Belum punya akun?{" "}
-          <Link href="/register" className="font-medium text-desahub-600 hover:text-desahub-700">
+          <Link href={REGISTER_PATH} className="font-medium text-desahub-600 hover:text-desahub-700">
             Daftar sekarang
           </Link>
         </p>
@@ -94,10 +93,9 @@ export default function LoginForm() {
           onChange={(e) => updateField("password", e.target.value)}
         />
 
-        <div className="flex items-center justify-between gap-3">
-          <Checkbox checked={rememberMe} onChange={setRememberMe} label="Ingat saya" />
+        <div className="flex justify-end">
           <Link
-            href="/forgot-password"
+            href={FORGOT_PASSWORD_PATH}
             className="text-sm font-medium text-desahub-600 hover:text-desahub-700"
           >
             Lupa password?

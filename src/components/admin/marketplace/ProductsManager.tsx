@@ -4,6 +4,7 @@ import Input from "@/components/form/input/InputField";
 import TextArea from "@/components/form/input/TextArea";
 import Label from "@/components/form/Label";
 import ProductsTable from "@/components/admin/marketplace/ProductsTable";
+import Pagination from "@/components/tables/Pagination";
 import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
 import FormSelect from "@/components/ui/select/FormSelect";
@@ -11,7 +12,7 @@ import ScrollArea from "@/components/ui/scroll-area/ScrollArea";
 import { Modal } from "@/components/ui/modal";
 import { useMasterKategoriList } from "@/hooks/useMasterKategoriList";
 import { useMasterPenjualList } from "@/hooks/useMasterPenjualList";
-import { useProductList } from "@/hooks/useProductList";
+import { useProductPaginated } from "@/hooks/useProductPaginated";
 import { useModal } from "@/hooks/useModal";
 import { mapProductApiError } from "@/lib/product-errors";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
@@ -40,7 +41,17 @@ function getEmptyForm(
 }
 
 export default function ProductsManager() {
-  const { items, isLoading, error, refetch } = useProductList();
+  const {
+    items,
+    pagination,
+    page,
+    setPage,
+    search,
+    setSearch,
+    isLoading,
+    error,
+    refetch,
+  } = useProductPaginated();
   const {
     items: kategoriList,
     isLoading: isKategoriLoading,
@@ -71,7 +82,7 @@ export default function ProductsManager() {
 
   const isDropdownLoading = isKategoriLoading || isPenjualLoading;
   const dropdownError = kategoriError ?? penjualError;
-  const lowStock = items.filter((p) => p.stock < 20).length;
+  const showPagination = pagination.lastPage > 1;
 
   const resetFormState = () => {
     setForm(getEmptyForm(kategoriList[0]?.uuid ?? "", penjualList[0]?.uuid ?? ""));
@@ -229,8 +240,7 @@ export default function ProductsManager() {
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {isLoading
               ? "Memuat data..."
-              : `${items.length} produk terdaftar`}
-            {!isLoading && lowStock > 0 && ` · ${lowStock} produk stok rendah`}
+              : `${pagination.total} produk terdaftar`}
           </p>
         </div>
         <Button
@@ -240,6 +250,15 @@ export default function ProductsManager() {
         >
           + Tambah Produk
         </Button>
+      </div>
+
+      <div className="max-w-md">
+        <Input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Cari produk..."
+        />
       </div>
 
       {error && (
@@ -261,11 +280,22 @@ export default function ProductsManager() {
           </p>
         </div>
       ) : (
-        <ProductsTable
-          products={items}
-          onEdit={openEditModal}
-          onDelete={openDeleteModal}
-        />
+        <>
+          <ProductsTable
+            products={items}
+            onEdit={openEditModal}
+            onDelete={openDeleteModal}
+          />
+          {showPagination && (
+            <div className="flex justify-end">
+              <Pagination
+                currentPage={page}
+                totalPages={pagination.lastPage}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
+        </>
       )}
 
       <Modal

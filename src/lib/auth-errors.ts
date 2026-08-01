@@ -1,9 +1,21 @@
-import type { LoginFormData, RegisterFormData } from "@/types/auth";
-import { LOGIN_FIELD_MAP, REGISTER_FIELD_MAP } from "@/types/auth";
+import type {
+  ForgotPasswordFormData,
+  LoginFormData,
+  RegisterFormData,
+  ResetPasswordFormData,
+} from "@/types/auth";
+import {
+  FORGOT_PASSWORD_FIELD_MAP,
+  LOGIN_FIELD_MAP,
+  REGISTER_FIELD_MAP,
+  RESET_PASSWORD_FIELD_MAP,
+} from "@/types/auth";
 import { ApiError } from "@/types/api";
 
 type RegisterFormErrors = Partial<Record<keyof RegisterFormData, string>>;
 type LoginFormErrors = Partial<Record<keyof LoginFormData, string>>;
+type ForgotPasswordFormErrors = Partial<Record<keyof ForgotPasswordFormData, string>>;
+type ResetPasswordFormErrors = Partial<Record<keyof ResetPasswordFormData, string>>;
 
 type FieldRule<T extends string> = {
   field: T;
@@ -97,6 +109,17 @@ const LOGIN_MESSAGE_FIELD_RULES: FieldRule<keyof LoginFormData>[] = [
   { field: "password", keywords: ["password"] },
 ];
 
+const FORGOT_PASSWORD_MESSAGE_FIELD_RULES: FieldRule<keyof ForgotPasswordFormData>[] = [
+  { field: "email", keywords: ["email"] },
+];
+
+const RESET_PASSWORD_MESSAGE_FIELD_RULES: FieldRule<keyof ResetPasswordFormData>[] = [
+  { field: "email", keywords: ["email"] },
+  { field: "token", keywords: ["token"] },
+  { field: "password", keywords: ["password"] },
+  { field: "passwordConfirmation", keywords: ["password confirmation", "password_confirmation"] },
+];
+
 export function mapRegisterApiError(error: unknown): {
   fieldErrors: RegisterFormErrors;
   formError: string;
@@ -123,4 +146,32 @@ export function mapLoginApiError(error: unknown): {
   }
 
   return mapApiFormError(error, LOGIN_MESSAGE_FIELD_RULES, LOGIN_FIELD_MAP);
+}
+
+export function mapForgotPasswordApiError(error: unknown): {
+  fieldErrors: ForgotPasswordFormErrors;
+  formError: string;
+} {
+  if (!(error instanceof ApiError)) {
+    return {
+      fieldErrors: {},
+      formError: "Terjadi kesalahan. Silakan coba lagi.",
+    };
+  }
+
+  return mapApiFormError(error, FORGOT_PASSWORD_MESSAGE_FIELD_RULES, FORGOT_PASSWORD_FIELD_MAP);
+}
+
+export function mapResetPasswordApiError(error: unknown): {
+  fieldErrors: ResetPasswordFormErrors;
+  formError: string;
+} {
+  if (!(error instanceof ApiError)) {
+    return {
+      fieldErrors: {},
+      formError: "Terjadi kesalahan. Silakan coba lagi.",
+    };
+  }
+
+  return mapApiFormError(error, RESET_PASSWORD_MESSAGE_FIELD_RULES, RESET_PASSWORD_FIELD_MAP);
 }

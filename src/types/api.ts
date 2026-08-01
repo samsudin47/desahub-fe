@@ -1,9 +1,30 @@
+export type ApiPagination = {
+  currentPage: number;
+  perPage: number;
+  total: number;
+  lastPage: number;
+  from: number | null;
+  to: number | null;
+};
+
+export type ApiListParams = {
+  page?: number;
+  perPage?: number;
+  search?: string;
+};
+
+export type ApiPaginatedResult<T> = {
+  items: T[];
+  pagination: ApiPagination;
+};
+
 export interface ApiSuccessResponse<T> {
   result: "success";
   code: number;
   message: string;
   description: string;
   additionalInformation: string;
+  pagination?: ApiPagination;
   datas: T;
 }
 

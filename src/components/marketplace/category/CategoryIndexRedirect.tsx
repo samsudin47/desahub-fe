@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useDropdownKategori } from "@/hooks/useDropdownKategori";
 import { slugify } from "@/lib/slugify";
 
-const FALLBACK_HREF = "/marketplace-umkm/kategori/makanan";
+const FALLBACK_HREF = "/marketplace-umkm";
 
 export default function CategoryIndexRedirect() {
   const router = useRouter();

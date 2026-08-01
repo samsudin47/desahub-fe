@@ -67,3 +67,25 @@ export const REGISTER_FIELD_MAP: Record<string, keyof RegisterFormData> = {
   password_confirmation: "passwordConfirmation",
   role: "role",
 };
+
+export interface ForgotPasswordFormData {
+  email: string;
+}
+
+export const FORGOT_PASSWORD_FIELD_MAP: Record<string, keyof ForgotPasswordFormData> = {
+  email: "email",
+};
+
+export interface ResetPasswordFormData {
+  email: string;
+  token: string;
+  password: string;
+  passwordConfirmation: string;
+}
+
+export const RESET_PASSWORD_FIELD_MAP: Record<string, keyof ResetPasswordFormData> = {
+  email: "email",
+  token: "token",
+  password: "password",
+  password_confirmation: "passwordConfirmation",
+};

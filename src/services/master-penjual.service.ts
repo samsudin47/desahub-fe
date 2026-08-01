@@ -1,6 +1,12 @@
 import { getDataManagementUrl } from "@/config/env";
 import { getApiSuccessMessage } from "@/lib/api-message";
 import { apiRequest } from "@/lib/api-client";
+import {
+  buildListQuery,
+  DEFAULT_LIST_PER_PAGE,
+  emptyPagination,
+} from "@/lib/api-query";
+import type { ApiListParams, ApiPaginatedResult } from "@/types/api";
 import type {
   MasterPenjual,
   MasterPenjualFormData,
@@ -26,6 +32,7 @@ function toFormBody(data: MasterPenjualFormData): Record<string, string> {
   };
 }
 
+/** Unpaginated-style fetch for dropdowns / consumers that need a simple array. */
 export async function fetchMasterPenjualList(): Promise<MasterPenjual[]> {
   const response = await apiRequest<MasterPenjualListDatas>(
     getDataManagementUrl(MASTER_PENJUAL_PATH),
@@ -33,6 +40,23 @@ export async function fetchMasterPenjualList(): Promise<MasterPenjual[]> {
   );
 
   return response.datas.master_penjual ?? [];
+}
+
+export async function fetchMasterPenjualPage(
+  params: ApiListParams = {},
+): Promise<ApiPaginatedResult<MasterPenjual>> {
+  const perPage = params.perPage ?? DEFAULT_LIST_PER_PAGE;
+  const response = await apiRequest<MasterPenjualListDatas>(
+    getDataManagementUrl(
+      `${MASTER_PENJUAL_PATH}${buildListQuery({ ...params, perPage })}`,
+    ),
+    { method: "GET" },
+  );
+
+  return {
+    items: response.datas.master_penjual ?? [],
+    pagination: response.pagination ?? emptyPagination(perPage),
+  };
 }
 
 export async function createMasterPenjual(

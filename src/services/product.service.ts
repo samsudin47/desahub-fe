@@ -1,6 +1,12 @@
 import { getMarketplaceUrl } from "@/config/env";
 import { getApiSuccessMessage } from "@/lib/api-message";
 import { apiRequest } from "@/lib/api-client";
+import {
+  buildListQuery,
+  DEFAULT_LIST_PER_PAGE,
+  emptyPagination,
+} from "@/lib/api-query";
+import type { ApiListParams, ApiPaginatedResult } from "@/types/api";
 import type { Product, ProductFormData } from "@/types/product";
 
 type ProductListDatas = {
@@ -37,6 +43,7 @@ function toFormData(data: ProductSubmitData): FormData {
   return formData;
 }
 
+/** Simple list fetch without explicit pagination params. */
 export async function fetchProductList(): Promise<Product[]> {
   const response = await apiRequest<ProductListDatas>(
     getMarketplaceUrl(PRODUCT_PATH),
@@ -44,6 +51,23 @@ export async function fetchProductList(): Promise<Product[]> {
   );
 
   return response.datas.product ?? [];
+}
+
+export async function fetchProductPage(
+  params: ApiListParams = {},
+): Promise<ApiPaginatedResult<Product>> {
+  const perPage = params.perPage ?? DEFAULT_LIST_PER_PAGE;
+  const response = await apiRequest<ProductListDatas>(
+    getMarketplaceUrl(
+      `${PRODUCT_PATH}${buildListQuery({ ...params, perPage })}`,
+    ),
+    { method: "GET" },
+  );
+
+  return {
+    items: response.datas.product ?? [],
+    pagination: response.pagination ?? emptyPagination(perPage),
+  };
 }
 
 export async function fetchProductByUuid(uuid: string): Promise<Product> {

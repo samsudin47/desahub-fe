@@ -8,6 +8,8 @@ import type {
   LoginFormData,
   RegisterFormData,
   RegisterPayload,
+  ResetPasswordFormData,
+  ForgotPasswordFormData,
 } from "@/types/auth";
 import { API_ROLES } from "@/types/auth";
 
@@ -117,4 +119,27 @@ export async function logout(): Promise<void> {
   } finally {
     clearAuthSession();
   }
+}
+
+export async function forgotPassword(form: ForgotPasswordFormData): Promise<void> {
+  await apiRequest<unknown[]>(getIamUrl("auth/forgot-password"), {
+    method: "POST",
+    token: null,
+    body: {
+      email: form.email.trim(),
+    },
+  });
+}
+
+export async function resetPassword(form: ResetPasswordFormData): Promise<void> {
+  await apiRequest<unknown[]>(getIamUrl("auth/reset-password"), {
+    method: "POST",
+    token: null,
+    body: {
+      email: form.email.trim(),
+      token: form.token.trim(),
+      password: form.password,
+      password_confirmation: form.passwordConfirmation,
+    },
+  });
 }

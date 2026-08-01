@@ -18,6 +18,8 @@ import MktButton from "@/components/marketplace/ui/MktButton";
 
 import { useRegisterableRoles } from "@/hooks/useRegisterableRoles";
 
+import { LOGIN_PATH } from "@/config/auth-routes";
+
 import { mapRegisterApiError } from "@/lib/auth-errors";
 
 import { getPostLoginPath, register } from "@/services/auth.service";
@@ -132,7 +134,7 @@ export default function RegisterForm() {
 
           Sudah punya akun?{" "}
 
-          <Link href="/login" className="font-medium text-desahub-600 hover:text-desahub-700">
+          <Link href={LOGIN_PATH} className="font-medium text-desahub-600 hover:text-desahub-700">
 
             Masuk di sini
 

@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
 const navItems = [
   { href: "/marketplace-umkm", label: "Beranda", icon: Home, exact: true },
   {
-    href: "/marketplace-umkm/kategori/makanan",
+    href: "/marketplace-umkm/kategori",
     label: "Kategori",
     icon: LayoutGrid,
     match: "/marketplace-umkm/kategori",

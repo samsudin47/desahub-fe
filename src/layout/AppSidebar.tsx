@@ -67,8 +67,6 @@ const navItems: NavItem[] = [
       { name: "Dashboard", path: "/kelola-marketplace" },
       { name: "Produk", path: "/kelola-marketplace/produk" },
       { name: "Pesanan", path: "/kelola-marketplace/pesanan" },
-      { name: "Penjual UMKM", path: "/kelola-marketplace/penjual" },
-      { name: "Kategori", path: "/kelola-marketplace/kategori" },
     ],
   },
   {

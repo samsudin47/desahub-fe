@@ -18,7 +18,7 @@ import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/cn";
 
 const navLinks = [
-  { href: "/marketplace-umkm/kategori/makanan", label: "Kategori" },
+  { href: "/marketplace-umkm/kategori", label: "Kategori" },
   { href: "/marketplace-umkm/pesanan", label: "Pesanan Saya" },
   { href: "/marketplace-umkm#tentang", label: "Tentang Desa" },
   { href: "/marketplace-umkm#bantuan", label: "Bantuan" },
