@@ -27,8 +27,8 @@ function toSeller(item: ProductCategoryProduct): Seller {
 }
 
 export function mapToMarketplaceProduct(
-  item: ProductCategoryProduct,
-  categorySlug: string,
+  item: ProductCategoryProduct & { total_terjual?: number },
+  categorySlug = "makanan",
 ): Product {
   return {
     id: item.uuid,
@@ -38,7 +38,7 @@ export function mapToMarketplaceProduct(
     category: toProductCategory(categorySlug),
     seller: toSeller(item),
     rating: item.rating ?? 0,
-    sold: 0,
+    sold: item.total_terjual ?? 0,
     stock: item.stock,
     imageColor: "#F3F4F6",
     imageUrl: item.gambar ?? undefined,

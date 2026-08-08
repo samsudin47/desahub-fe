@@ -339,6 +339,17 @@
   }
 }
 
+.category-carousel {
+  .swiper-wrapper {
+    transition-timing-function: linear !important;
+  }
+
+  .swiper-button-prev,
+  .swiper-button-next {
+    display: none;
+  }
+}
+
 @utility custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #d0d5dd transparent;

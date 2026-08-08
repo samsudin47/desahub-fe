@@ -95,6 +95,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Master Kategori", path: "/data-management/master-kategori" },
       { name: "Master Penjual", path: "/data-management/master-penjual" },
+      { name: "Master Banner", path: "/data-management/master-banner" },
     ],
   },
   {
